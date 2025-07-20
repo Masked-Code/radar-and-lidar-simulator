@@ -20,6 +20,7 @@
 // Include all simulation headers
 #include "signal_types.h"
 #include "radar_config.h"
+#include "signal_generator.h"
 #include "fft_processor.h"
 #include "target_simulator.h"
 #include "doppler_analyzer.h"
@@ -81,7 +82,6 @@ static const ProgramConfig DEFAULT_CONFIG = {
 static void print_usage(const char* program_name);
 static void print_version(void);
 static bool parse_command_line(int argc, char* argv[], ProgramConfig* config);
-static bool initialize_simulation(const ProgramConfig* config, SystemConfig* sys_config);
 static bool run_radar_simulation(const ProgramConfig* config);
 static bool run_lidar_simulation(const ProgramConfig* config);
 static bool create_test_scenario(SimulationEnvironment* env, const ProgramConfig* config);

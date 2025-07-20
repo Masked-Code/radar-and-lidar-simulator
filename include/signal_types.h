@@ -15,6 +15,7 @@
 #include <complex.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 // Complex number definitions for C compatibility
 #ifdef __cplusplus

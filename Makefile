@@ -7,17 +7,14 @@
 # BUILD CONFIGURATION
 # ============================================================================
 
-# Project name and version
 PROJECT_NAME = radar-lidar-simulator
 PROJECT_VERSION = 1.0.0
 
-# Compiler and build tools
 CC = gcc
 LD = gcc
 AR = ar
 STRIP = strip
 
-# Build directories
 SRC_DIR = src
 INC_DIR = include
 OBJ_DIR = obj
@@ -27,44 +24,28 @@ DOC_DIR = docs
 TEST_DIR = tests
 EXAMPLE_DIR = examples
 
-# Create directories if they don't exist
 $(shell mkdir -p $(OBJ_DIR) $(BIN_DIR) $(LIB_DIR))
 
 # ============================================================================
 # COMPILER FLAGS
 # ============================================================================
 
-# Basic compiler flags
 CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -Wformat=2 -Wformat-security
 CFLAGS += -Wstrict-prototypes -Wmissing-prototypes -Wold-style-definition
 CFLAGS += -Wredundant-decls -Wnested-externs -Wmissing-include-dirs
 CFLAGS += -Wswitch-default -Wswitch-enum -Wunused-parameter
 CFLAGS += -Wuninitialized -Wmaybe-uninitialized -Wshadow
-
-# Include directories
 CFLAGS += -I$(INC_DIR)
+CFLAGS += -DFFTW_ENABLE_FLOAT -pthread
+LDFLAGS += -lm -lfftw3 -lfftw3f -pthread
 
-# Math library
-LDFLAGS += -lm
-
-# FFTW library
-CFLAGS += -DFFTW_ENABLE_FLOAT
-LDFLAGS += -lfftw3 -lfftw3f
-
-# Threading support
-CFLAGS += -pthread
-LDFLAGS += -pthread
-
-# Platform-specific settings
 ifeq ($(OS),Windows_NT)
-    # Windows-specific settings
     CFLAGS += -D_WIN32_WINNT=0x0600 -DWIN32_LEAN_AND_MEAN
     LDFLAGS += -lws2_32 -lwinmm
     EXECUTABLE_EXT = .exe
     LIBRARY_EXT = .dll
     STATIC_LIB_EXT = .lib
 else
-    # Unix/Linux-specific settings
     CFLAGS += -D_GNU_SOURCE
     LDFLAGS += -ldl -lrt
     EXECUTABLE_EXT =
@@ -72,7 +53,6 @@ else
     STATIC_LIB_EXT = .a
 endif
 
-# Build type configuration
 BUILD_TYPE ?= Release
 
 ifeq ($(BUILD_TYPE),Debug)
@@ -95,7 +75,6 @@ endif
 # SOURCE FILES
 # ============================================================================
 
-# Core source files
 CORE_SOURCES = \
     $(SRC_DIR)/signal_generator.c \
     $(SRC_DIR)/target_simulator.c \
@@ -104,16 +83,13 @@ CORE_SOURCES = \
     $(SRC_DIR)/range_detector.c \
     $(SRC_DIR)/utils.c
 
-# Main program source
 MAIN_SOURCE = $(SRC_DIR)/main.c
 
-# Example sources
 EXAMPLE_SOURCES = \
     $(EXAMPLE_DIR)/basic_radar.c \
     $(EXAMPLE_DIR)/multi_target.c \
     $(EXAMPLE_DIR)/doppler_demo.c
 
-# Test sources
 TEST_SOURCES = \
     $(TEST_DIR)/test_fft.c \
     $(TEST_DIR)/test_signals.c \
@@ -123,66 +99,49 @@ TEST_SOURCES = \
 # OBJECT FILES
 # ============================================================================
 
-# Core object files
 CORE_OBJECTS = $(CORE_SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-
-# Main program object
 MAIN_OBJECT = $(MAIN_SOURCE:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-
-# Example objects
 EXAMPLE_OBJECTS = $(EXAMPLE_SOURCES:$(EXAMPLE_DIR)/%.c=$(OBJ_DIR)/%.o)
-
-# Test objects
 TEST_OBJECTS = $(TEST_SOURCES:$(TEST_DIR)/%.c=$(OBJ_DIR)/%.o)
-
-# All object files
 ALL_OBJECTS = $(CORE_OBJECTS) $(MAIN_OBJECT) $(EXAMPLE_OBJECTS) $(TEST_OBJECTS)
 
 # ============================================================================
 # TARGET EXECUTABLES
 # ============================================================================
 
-# Main executable
 MAIN_TARGET = $(BIN_DIR)/$(PROJECT_NAME)$(EXECUTABLE_EXT)
 
-# Example executables
 EXAMPLE_TARGETS = \
     $(BIN_DIR)/basic_radar$(EXECUTABLE_EXT) \
     $(BIN_DIR)/multi_target$(EXECUTABLE_EXT) \
     $(BIN_DIR)/doppler_demo$(EXECUTABLE_EXT)
 
-# Test executables
 TEST_TARGETS = \
     $(BIN_DIR)/test_fft$(EXECUTABLE_EXT) \
     $(BIN_DIR)/test_signals$(EXECUTABLE_EXT) \
     $(BIN_DIR)/test_doppler$(EXECUTABLE_EXT)
 
-# Static library
 STATIC_LIB = $(LIB_DIR)/lib$(PROJECT_NAME)$(STATIC_LIB_EXT)
 
 # ============================================================================
 # BUILD TARGETS
 # ============================================================================
 
-# Default target
 .PHONY: all
 all: $(MAIN_TARGET) $(STATIC_LIB)
 	@echo "Build complete: $(BUILD_TYPE)"
 	@echo "Main executable: $(MAIN_TARGET)"
 	@echo "Static library: $(STATIC_LIB)"
 
-# Main executable
 $(MAIN_TARGET): $(MAIN_OBJECT) $(CORE_OBJECTS)
 	@echo "Linking main executable: $@"
 	$(LD) -o $@ $^ $(LDFLAGS)
 	$(STRIP_CMD) $@
 
-# Static library
 $(STATIC_LIB): $(CORE_OBJECTS)
 	@echo "Creating static library: $@"
 	$(AR) rcs $@ $^
 
-# Examples
 .PHONY: examples
 examples: $(EXAMPLE_TARGETS)
 
@@ -201,7 +160,6 @@ $(BIN_DIR)/doppler_demo$(EXECUTABLE_EXT): $(OBJ_DIR)/doppler_demo.o $(CORE_OBJEC
 	$(LD) -o $@ $^ $(LDFLAGS)
 	$(STRIP_CMD) $@
 
-# Tests
 .PHONY: tests
 tests: $(TEST_TARGETS)
 
@@ -221,18 +179,18 @@ $(BIN_DIR)/test_doppler$(EXECUTABLE_EXT): $(OBJ_DIR)/test_doppler.o $(CORE_OBJEC
 # OBJECT FILE COMPILATION
 # ============================================================================
 
-# Core source objects
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	@echo "Compiling: $<"
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Example objects
 $(OBJ_DIR)/%.o: $(EXAMPLE_DIR)/%.c
+	@mkdir -p $(dir $@)
 	@echo "Compiling example: $<"
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Test objects
 $(OBJ_DIR)/%.o: $(TEST_DIR)/%.c
+	@mkdir -p $(dir $@)
 	@echo "Compiling test: $<"
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -240,7 +198,6 @@ $(OBJ_DIR)/%.o: $(TEST_DIR)/%.c
 # UTILITY TARGETS
 # ============================================================================
 
-# Run tests
 .PHONY: test
 test: tests
 	@echo "Running tests..."
@@ -250,7 +207,6 @@ test: tests
 	done
 	@echo "All tests passed!"
 
-# Run examples
 .PHONY: run-examples
 run-examples: examples
 	@echo "Running examples..."
@@ -261,7 +217,6 @@ run-examples: examples
 	@echo "\n3. Doppler Demo:"
 	$(BIN_DIR)/doppler_demo$(EXECUTABLE_EXT)
 
-# Generate documentation
 .PHONY: docs
 docs:
 	@echo "Generating documentation..."
@@ -272,7 +227,6 @@ docs:
 		echo "Doxygen not found. Please install doxygen to generate documentation."; \
 	fi
 
-# Static analysis
 .PHONY: analyze
 analyze:
 	@echo "Running static analysis..."
@@ -284,7 +238,6 @@ analyze:
 		echo "cppcheck not found. Please install cppcheck for static analysis."; \
 	fi
 
-# Format code
 .PHONY: format
 format:
 	@echo "Formatting code..."
@@ -296,7 +249,6 @@ format:
 		echo "clang-format not found. Please install clang-format for code formatting."; \
 	fi
 
-# Check dependencies
 .PHONY: check-deps
 check-deps:
 	@echo "Checking dependencies..."
@@ -304,7 +256,6 @@ check-deps:
 	@echo -n "FFTW3: "; pkg-config --modversion fftw3 2>/dev/null || echo "Not found"
 	@echo -n "Make: "; make --version | head -n1 || echo "Not found"
 
-# Install target (Unix/Linux only)
 .PHONY: install
 install: $(MAIN_TARGET) $(STATIC_LIB)
 	@if [ "$(OS)" != "Windows_NT" ]; then \
@@ -320,7 +271,6 @@ install: $(MAIN_TARGET) $(STATIC_LIB)
 		echo "Install target not supported on Windows."; \
 	fi
 
-# Package target
 .PHONY: package
 package: all examples
 	@echo "Creating package..."
@@ -335,7 +285,6 @@ package: all examples
 	 rm -rf $$PACKAGE_NAME; \
 	 echo "Package created: $$PACKAGE_NAME.tar.gz"
 
-# Clean build artifacts
 .PHONY: clean
 clean:
 	@echo "Cleaning build artifacts..."
@@ -343,7 +292,6 @@ clean:
 	rm -f *.tar.gz
 	@echo "Clean complete."
 
-# Clean everything including documentation
 .PHONY: distclean
 distclean: clean
 	@echo "Cleaning all generated files..."
@@ -391,27 +339,20 @@ help:
 # DEPENDENCY TRACKING
 # ============================================================================
 
-# Generate dependency files
 -include $(ALL_OBJECTS:.o=.d)
 
-# Pattern rule for generating dependency files
 $(OBJ_DIR)/%.d: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -MM -MT $(OBJ_DIR)/$*.o -MF $@ $<
 
 $(OBJ_DIR)/%.d: $(EXAMPLE_DIR)/%.c
+	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -MM -MT $(OBJ_DIR)/$*.o -MF $@ $<
 
 $(OBJ_DIR)/%.d: $(TEST_DIR)/%.c
+	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -MM -MT $(OBJ_DIR)/$*.o -MF $@ $<
 
-# ============================================================================
-# PHONY TARGET DECLARATIONS
-# ============================================================================
-
-.PHONY: all examples tests test run-examples docs analyze format \
-        check-deps install package clean distclean help
-
-# Special targets
 .SUFFIXES:
 .DELETE_ON_ERROR:
 .SECONDARY:

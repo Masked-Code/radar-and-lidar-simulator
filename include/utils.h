@@ -574,16 +574,6 @@ bool generate_sine_wave(SignalBuffer* signal, double frequency, double amplitude
  */
 bool generate_complex_exponential(SignalBuffer* signal, double frequency, double amplitude, double phase);
 
-/**
- * @brief Generate linear chirp signal
- * 
- * @param signal Output signal buffer
- * @param start_freq Start frequency (Hz)
- * @param end_freq End frequency (Hz)
- * @param amplitude Signal amplitude
- * @return true if generation successful, false otherwise
- */
-bool generate_linear_chirp(SignalBuffer* signal, double start_freq, double end_freq, double amplitude);
 
 /**
  * @brief Add white Gaussian noise to signal

@@ -183,20 +183,6 @@ bool generate_target_echo(const SimulationEnvironment* env, uint32_t target_id,
                          const SignalBuffer* tx_signal, SignalBuffer* rx_signal,
                          const PulseParams* pulse_params);
 
-/**
- * @brief Generate multi-target composite signal
- * 
- * Creates a composite received signal containing echoes from all active
- * targets in the simulation environment.
- * 
- * @param env Pointer to simulation environment
- * @param tx_signal Transmitted signal
- * @param rx_signal Output composite received signal
- * @param pulse_params Radar pulse parameters
- * @return true if signal generation successful, false otherwise
- */
-bool generate_multi_target_signal(const SimulationEnvironment* env, const SignalBuffer* tx_signal,
-                                 SignalBuffer* rx_signal, const PulseParams* pulse_params);
 
 /**
  * @brief Add clutter to received signal
