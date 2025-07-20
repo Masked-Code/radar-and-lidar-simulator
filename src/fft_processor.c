@@ -96,7 +96,7 @@ bool fft_forward(FFTProcessor* processor, const SignalBuffer* input, SignalBuffe
     return true;
 }
 
-bool generate_window(WindowType window_type, uint32_t window_length, double* coefficients, double beta) {
+bool generate_window(WindowType window_type, uint32_t window_length, double* coefficients) {
     if (!coefficients || window_length == 0) {
         return false;
     }
